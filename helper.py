@@ -5,15 +5,13 @@ alphabet = list("abcdefghijklmnopqrstuvwxyz")
 
 
 def get_words():
-    try:
-        user_input = input("Only common words [Y/n]? ")
-        if user_input[0].lower() == "n": return allWords.get_all_words()
-    except: pass
+    only_common = input_yes_or_no("Only common words [Y/n]? ")
+    if only_common: return allWords.get_all_words()
     return allWords.get_common_words()
 
-def input_double_letters():
+def input_yes_or_no(prompt):
     try:
-        user_input = input("Could there be double letters [Y/n]? ")
+        user_input = input(prompt)
         if user_input[0].lower() == "n": return False
     except: pass
     return True
@@ -47,8 +45,8 @@ def input_green_letters():
         except:
             print("Hint: you are doing something wrong (maybe read the directions?)")
 
-def input_yellow_letters():
-    print("Enter letters that you are are in the word (aka the 'yellow' letters).")
+def input_letters(prompt):
+    print(prompt)
     letters = []
     while True:
         try:
@@ -76,23 +74,14 @@ def bold_text(txt):
     print("# " + txt + " #")
     print("#" * (len(txt) + 4))
 
-
-def main():
-
-    print("\nSTARTING...\n")
+def run(word_len, words, double_letters):
+    print("\nENTER INFORMATION...\n")
     
-    bold_text("Welcome to the wordle helper!")
-    
-    print("\n") 
-    words = get_words()
-    print("\n") 
-    double_letters = input_double_letters()
-    print("\n") 
-    word_len = input_word_len()
-    print("\n")
     green_letters = input_green_letters()
     print("\n")
-    yellow_letters = input_yellow_letters()
+    yellow_letters = input_letters("Enter letters that you are are in the word (aka the 'yellow' letters).")
+    print("\n")
+    dark_letters = input_letters("Enter letters that are not in the word.")
 
     print("\nSEARCHING...")
     possible_words = []
@@ -104,6 +93,8 @@ def main():
             except: continue
         for yl in yellow_letters:
             good = only_neg(good, yl in word)
+        for dl in dark_letters:
+            good = only_neg(good, dl not in word)
         if good: possible_words.append(word)
     print("FINISHED SEARCHING...\n")
 
@@ -113,6 +104,24 @@ def main():
             print("%i) %s" % (i + 1, possible_words[i]))
     else:
         print("No words found. Did you mis-type or incorrectly enter information?")
+
+
+def main():
+    print("\nPROGRAM STARTING...\n")
+    bold_text("Welcome to the wordle helper!")
+    
+    print("\n") 
+    word_len = input_word_len()
+    print("\n")
+    words = get_words()
+    print("\n") 
+    double_letters = input_yes_or_no("Could there be double letters [Y/n]? ")
+
+    running = True
+    while running:
+        run(word_len, words, double_letters)
+        print("\n") 
+        running = input_yes_or_no("Run again [Y/n]? ")
 
     print("\nPROGRAM EXITING...\n")
 
