@@ -1,5 +1,6 @@
 import allWords
 import time
+import math
 
 
 ALPHABET = list("abcdefghijklmnopqrstuvwxyz")
@@ -33,14 +34,19 @@ def has_double_letters(word):
 def filter_words(words, word_len, double_letters):
     filtered_words = []
     for word in words:
-        if len(word) == word_len and not (not double_letters and has_double_letters(word)):
+        if len(word) == word_len and not (
+            not double_letters and has_double_letters(word)
+        ):
             filtered_words.append(word)
     return filtered_words
-    
+
 
 def get_words():
     only_common = input_yes_or_no("Only common words [Y/n]? ")
     if only_common:
+        only_wordle = input_yes_or_no("Only wordle words [Y/n]? ")
+        if only_wordle:
+            return allWords.get_wordle_words()
         return allWords.get_common_words()
     return allWords.get_all_words()
 
@@ -109,7 +115,7 @@ def input_yellow_letters(word_len):
         "First enter the letter, hit [enter] then enter the positions where the letter is not of the letter where 1 is the first letter."
     )
     print(
-""" Example:
+        """ Example:
     Letter (leave blank to continue): r
     Position(s) where it is not: 1 3\n"""
     )
@@ -239,7 +245,7 @@ def run(words, gls, yls, dls):
 #     return word_scores
 
 
-def wordle_compare(guess, answer):
+def wordle_compare(answer, guess):
     # letter_lst = list(word)
     # for gl in gls:
     #     if word[gl[1]] == gl[0]:
@@ -257,6 +263,7 @@ def wordle_compare(guess, answer):
     #     if dl in letter_lst:
     #         return False, letter_lst
     # return True, letter_lst
+    # ARE THEY BACKWARDS? ONLY THINKG THT WOULD CHANGE IS THE DLS
     letter_lst = list(answer)
     gls = []
     for i in range(len(guess)):
@@ -276,23 +283,40 @@ def wordle_compare(guess, answer):
 def calc_best_words(words):
     print("\nSTARTING CALCULATIONS...")
     t0 = time.time()
-    
+
     # THIS BLOCK OF CODE I THINK WORKS, BUT IT WILL TAKE LIKE 2 WEEKS TO RUN
     word_scores = {}
     i = 0
-    for guess_word in words:
-        i += 1
-        start_time = time.time()
+    # for guess_word in words:
+    guess_word = "craft"
+    i += 1
+    start_time = time.time()
 
-        word_scores[guess_word] = 0
-        for answer_word in words:
-            gls, yls, dls = wordle_compare(guess_word, answer_word)
-            for possible_valid_word in words:
-                word_scores[guess_word] += not is_good_word(possible_valid_word, gls, yls, dls)[0]
-        
-        time_taken = time.time() - start_time
-        print("%i/%i: %.3f \t %s \t %i \t %.2f" % (i, len(words), i/len(words), guess_word, word_scores[guess_word], time_taken))
+    # word_scores[guess_word] = 0
+    for answer_word in words:
+        word_scores[answer_word] = 0
+        gls, yls, dls = wordle_compare(guess_word, answer_word)
+        still_valid = 0
+        for possible_valid_word in words:
+            still_valid += is_good_word(possible_valid_word, gls, yls, dls)[0]
+        try:
+            word_scores[guess_word] = math.log(len(words) / still_valid, 2)
+        except:
+            pass
+        print("%s \t %s \t %.2f" % (guess_word, answer_word, word_scores[guess_word]))
 
+    # time_taken = time.time() - start_time
+    # print(
+    #     "%i/%i: %.3f \t %s \t %i \t %.2f"
+    #     % (
+    #         i,
+    #         len(words),
+    #         i / len(words),
+    #         guess_word,
+    #         word_scores[guess_word],
+    #         time_taken,
+    #     )
+    # )
 
     # THIS BLOCK OF CODE IS ABOUT THE SAME SPEED
     # BUT IT CAN BE SPEED UP BY HALFING THE TABLE
@@ -318,10 +342,9 @@ def calc_best_words(words):
     # print("CALCULATIONS DONE IN %.3f" % (time.time() - t1))
     # input_yes_or_no("Press enter to continue...")
 
-    ws_lst = sorted(word_scores.items(), key=lambda x: x[1])
-    for i in range(len(ws_lst)):
-        print(i, ws_lst[i][0], ws_lst[i][1])
-
+    ws_lst = sorted(word_scores.items(), key=lambda x: x[1], reverse=True)
+    # for i in range(len(ws_lst) - 1, -1, -1):
+    #     print("%i) %s \t %0.3f" % (i + 1, ws_lst[i][0], ws_lst[i][1]))
 
     print("DONE IN %.3f\n" % (time.time() - t0))
 
@@ -336,7 +359,7 @@ def main():
     word_len = input_word_len()
     print("\n")
     words = get_words()
-    words = words[:int(len(words)/5)]
+    # words = words[: int(len(words) / 5)]
     print("\n")
     double_letters = input_yes_or_no("Could there be double letters [Y/n]? ")
 
