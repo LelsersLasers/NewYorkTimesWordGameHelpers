@@ -287,12 +287,12 @@ def calc_best_words(words):
         word_scores[guess_word] = 0
         for answer_word in words:
             gls, yls, dls = wordle_compare(guess_word, answer_word)
-            word_scores[guess_word] += len(words)
             for possible_valid_word in words:
-                word_scores[guess_word] -= is_good_word(possible_valid_word, gls, yls, dls)[0]
+                word_scores[guess_word] += not is_good_word(possible_valid_word, gls, yls, dls)[0]
         
         time_taken = time.time() - start_time
         print("%i/%i: %.3f \t %s \t %i \t %.2f" % (i, len(words), i/len(words), guess_word, word_scores[guess_word], time_taken))
+
 
     # THIS BLOCK OF CODE IS ABOUT THE SAME SPEED
     # BUT IT CAN BE SPEED UP BY HALFING THE TABLE
@@ -302,15 +302,12 @@ def calc_best_words(words):
     #     for answer_word in words:
     #         word_table[guess_word + answer_word] = wordle_compare(guess_word, answer_word)
     # print("TABLE CREATED IN %.3f" % (time.time() - t0))
-
     # # input_yes_or_no("Press enter to continue...")
-
     # t1 = time.time()
     # word_scores = {}
     # # i = 0
     # for key in word_table:
     #     # i += 1
-        
     #     guess_word = key[:len(key)//2]
     #     word_scores[guess_word] = len(words)
     #     for possible_valid_word in words:
@@ -319,12 +316,13 @@ def calc_best_words(words):
 
     #     # print("%i/%i: %.5f \t %s \t %i" % (i, len(word_table), i/len(word_table) * 100, guess_word, word_scores[guess_word]))
     # print("CALCULATIONS DONE IN %.3f" % (time.time() - t1))
-    
     # input_yes_or_no("Press enter to continue...")
 
-    # ws_lst = sorted(word_scores.items(), key=lambda x: x[1])
-    # for i in range(len(ws_lst)):
-    #     print(i, ws_lst[i][0], ws_lst[i][1])
+    ws_lst = sorted(word_scores.items(), key=lambda x: x[1])
+    for i in range(len(ws_lst)):
+        print(i, ws_lst[i][0], ws_lst[i][1])
+
+
     print("DONE IN %.3f\n" % (time.time() - t0))
 
     return word_scores
@@ -338,6 +336,7 @@ def main():
     word_len = input_word_len()
     print("\n")
     words = get_words()
+    words = words[:int(len(words)/5)]
     print("\n")
     double_letters = input_yes_or_no("Could there be double letters [Y/n]? ")
 
