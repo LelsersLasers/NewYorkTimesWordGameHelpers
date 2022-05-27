@@ -285,42 +285,43 @@ def calc_best_words(words):
     t0 = time.time()
 
     # THIS BLOCK OF CODE I THINK WORKS, BUT IT WILL TAKE LIKE 2 WEEKS TO RUN
+    # NO IT DOESN'T REALLY WORK
     word_scores = {}
     i = 0
-    # for guess_word in words:
-    guess_word = "craft"
-    i += 1
-    start_time = time.time()
+    for guess_word in words:
+        i += 1
+        start_time = time.time()
 
-    # word_scores[guess_word] = 0
-    for answer_word in words:
-        word_scores[answer_word] = 0
-        gls, yls, dls = wordle_compare(guess_word, answer_word)
-        still_valid = 0
-        for possible_valid_word in words:
-            still_valid += is_good_word(possible_valid_word, gls, yls, dls)[0]
-        try:
-            word_scores[guess_word] = math.log(len(words) / still_valid, 2)
-        except:
-            pass
-        print("%s \t %s \t %.2f" % (guess_word, answer_word, word_scores[guess_word]))
+        word_scores[guess_word] = 0
+        for answer_word in words:
+            gls, yls, dls = wordle_compare(guess_word, answer_word)
+            not_valid = 0
+            for possible_valid_word in words:
+                not_valid += not is_good_word(possible_valid_word, gls, yls, dls)[0]
+            try:
+                word_scores[guess_word] += (
+                    (len(words) - not_valid) / len(words)
+                ) * math.log(len(words) / (len(words) - not_valid), 2)
+            except:
+                pass
 
-    # time_taken = time.time() - start_time
-    # print(
-    #     "%i/%i: %.3f \t %s \t %i \t %.2f"
-    #     % (
-    #         i,
-    #         len(words),
-    #         i / len(words),
-    #         guess_word,
-    #         word_scores[guess_word],
-    #         time_taken,
-    #     )
-    # )
+        time_taken = time.time() - start_time
+        print(
+            "%i/%i: %.2f \t %s \t %.2f \t %.2f"
+            % (
+                i,
+                len(words),
+                i / len(words) * 100,
+                guess_word,
+                word_scores[guess_word],
+                time_taken,
+            )
+        )
 
     # THIS BLOCK OF CODE IS ABOUT THE SAME SPEED
     # BUT IT CAN BE SPEED UP BY HALFING THE TABLE
     # BUT IT STILL WOULD BE REALLY SLOW
+    # AND IT WOULD NEVER "WORK BETTER" THAN THE ABOVE
     # word_table = {}
     # for guess_word in words:
     #     for answer_word in words:
@@ -343,8 +344,8 @@ def calc_best_words(words):
     # input_yes_or_no("Press enter to continue...")
 
     ws_lst = sorted(word_scores.items(), key=lambda x: x[1], reverse=True)
-    # for i in range(len(ws_lst) - 1, -1, -1):
-    #     print("%i) %s \t %0.3f" % (i + 1, ws_lst[i][0], ws_lst[i][1]))
+    for i in range(len(ws_lst) - 1, -1, -1):
+        print("%i) %s \t %0.3f" % (i + 1, ws_lst[i][0], ws_lst[i][1]))
 
     print("DONE IN %.3f\n" % (time.time() - t0))
 
