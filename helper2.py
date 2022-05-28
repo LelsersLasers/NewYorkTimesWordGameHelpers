@@ -285,10 +285,6 @@ def calc_best_words(words):
     t0 = time.time()
 
     # THIS MIGHT WORK, BUT IT TAKES FOREVER, SO IDK IF IT WORKS
-    print("\nSTARTING CALCULATIONS...")
-    t0 = time.time()
-    
-    # THIS BLOCK OF CODE I THINK WORKS, BUT IT WILL TAKE LIKE 2 WEEKS TO RUN
     word_scores = {}
     i = 0
     for guess_word in words:
@@ -300,7 +296,8 @@ def calc_best_words(words):
             gls, yls, dls = wordle_compare(guess_word, answer_word)
             for possible_valid_word in words:
                 word_scores[guess_word] += not is_good_word(possible_valid_word, gls, yls, dls)[0]
-        
+        word_scores[guess_word] = word_scores[guess_word] / (len(words) ** 2) * 100 # covert to average percent invalidated
+
         time_taken = time.time() - start_time
         print("%i/%i: %.3f \t %s \t %i \t %.2f" % (i, len(words), i/len(words), guess_word, word_scores[guess_word], time_taken))
 
