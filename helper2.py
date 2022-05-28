@@ -284,8 +284,11 @@ def calc_best_words(words):
     print("\nSTARTING CALCULATIONS...")
     t0 = time.time()
 
+    # THIS MIGHT WORK, BUT IT TAKES FOREVER, SO IDK IF IT WORKS
+    print("\nSTARTING CALCULATIONS...")
+    t0 = time.time()
+    
     # THIS BLOCK OF CODE I THINK WORKS, BUT IT WILL TAKE LIKE 2 WEEKS TO RUN
-    # NO IT DOESN'T REALLY WORK
     word_scores = {}
     i = 0
     for guess_word in words:
@@ -295,28 +298,45 @@ def calc_best_words(words):
         word_scores[guess_word] = 0
         for answer_word in words:
             gls, yls, dls = wordle_compare(guess_word, answer_word)
-            not_valid = 0
             for possible_valid_word in words:
-                not_valid += not is_good_word(possible_valid_word, gls, yls, dls)[0]
-            try:
-                word_scores[guess_word] += (
-                    (len(words) - not_valid) / len(words)
-                ) * math.log(len(words) / (len(words) - not_valid), 2)
-            except:
-                pass
-
+                word_scores[guess_word] += not is_good_word(possible_valid_word, gls, yls, dls)[0]
+        
         time_taken = time.time() - start_time
-        print(
-            "%i/%i: %.2f \t %s \t %.2f \t %.2f"
-            % (
-                i,
-                len(words),
-                i / len(words) * 100,
-                guess_word,
-                word_scores[guess_word],
-                time_taken,
-            )
-        )
+        print("%i/%i: %.3f \t %s \t %i \t %.2f" % (i, len(words), i/len(words), guess_word, word_scores[guess_word], time_taken))
+
+    # THIS BLOCK OF CODE I THINK WORKS, BUT IT WILL TAKE LIKE 2 WEEKS TO RUN
+    # NO IT DOESN'T REALLY WORK
+    # word_scores = {}
+    # i = 0
+    # for guess_word in words:
+    #     i += 1
+    #     start_time = time.time()
+
+    #     word_scores[guess_word] = 0
+    #     for answer_word in words:
+    #         gls, yls, dls = wordle_compare(guess_word, answer_word)
+    #         not_valid = 0
+    #         for possible_valid_word in words:
+    #             not_valid += not is_good_word(possible_valid_word, gls, yls, dls)[0]
+    #         try:
+    #             word_scores[guess_word] += (
+    #                 (len(words) - not_valid) / len(words)
+    #             ) * math.log(len(words) / (len(words) - not_valid), 2)
+    #         except:
+    #             pass
+
+    #     time_taken = time.time() - start_time
+    #     print(
+    #         "%i/%i: %.2f \t %s \t %.2f \t %.2f"
+    #         % (
+    #             i,
+    #             len(words),
+    #             i / len(words) * 100,
+    #             guess_word,
+    #             word_scores[guess_word],
+    #             time_taken,
+    #         )
+    #     )
 
     # THIS BLOCK OF CODE IS ABOUT THE SAME SPEED
     # BUT IT CAN BE SPEED UP BY HALFING THE TABLE
