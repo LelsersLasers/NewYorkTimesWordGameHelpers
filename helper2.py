@@ -283,6 +283,7 @@ def wordle_compare(answer, guess):
 def calc_best_words(words):
     print("\nSTARTING CALCULATIONS...")
     t0 = time.time()
+    # Once this works: guess_words should be unfiltered and answer/possible should be filtered
 
     # THIS MIGHT WORK, BUT IT TAKES FOREVER, SO IDK IF IT WORKS
     """
@@ -307,6 +308,7 @@ def calc_best_words(words):
     # Uses https://www.youtube.com/watch?v=v68zYyaEmEA video's math
     # But I don't actually understand the implementation of the math in the video
     # WAIT ITS ALL WRONG
+    """
     word_scores = {}
     i = 0
     for guess_word in words:
@@ -323,6 +325,44 @@ def calc_best_words(words):
                 word_scores[guess_word] += ((len(words) - not_valid) / len(words)) * -math.log((len(words) - not_valid) / len(words), 2)
             except:
                 pass
+
+        time_taken = time.time() - start_time
+        print(
+            "%i/%i: %.2f \t %s \t %.2f \t %.2f"
+            % (
+                i,
+                len(words),
+                i / len(words) * 100,
+                guess_word,
+                word_scores[guess_word],
+                time_taken,
+            )
+        )
+    """
+
+    # ANOTHER ATTEMPT OF THE MATH FROM THE VIDEO
+    # This is actually slower than the other one...
+    # No idea if it works
+    word_scores = {}
+    i = 0
+    for guess_word in words:
+        i += 1
+        start_time = time.time()
+
+        word_scores[guess_word] = 0
+        pattern_occurrences = {}
+        for answer_word in words:
+            gls, yls, dls = wordle_compare(guess_word, answer_word)
+            try:
+                pattern_occurrences[(gls, yls, dls)] += 1/len(words)
+            except:
+                pattern_occurrences[(gls, yls, dls)] = 1/len(words)
+        for pattern in pattern_occurrences:
+            gls, yls, dls = pattern
+            not_valid = 0
+            for possible_valid_word in words:
+                not_valid += not is_good_word(possible_valid_word, gls, yls, dls)[0]
+            word_scores[guess_word] += pattern_occurrences[pattern] * -math.log((len(words) - not_valid) / len(words), 2)
 
         time_taken = time.time() - start_time
         print(
