@@ -306,6 +306,7 @@ def calc_best_words(words):
     # THIS MIGHT ALSO WORK, but its still words^3 and takes forever
     # Uses https://www.youtube.com/watch?v=v68zYyaEmEA video's math
     # But I don't actually understand the implementation of the math in the video
+    # WAIT ITS ALL WRONG
     word_scores = {}
     i = 0
     for guess_word in words:
