@@ -301,32 +301,6 @@ def calc_best_words(words):
         word_scores[guess_word] = word_scores[guess_word] / (len(words) ** 2) * 100 # covert to average percent invalidated
 
         time_taken = time.time() - start_time
-        print("%i/%i: %.3f \t %s \t %i \t %.2f" % (i, len(words), i/len(words), guess_word, word_scores[guess_word], time_taken))
-    """
-
-    # THIS MIGHT ALSO WORK, but its still words^3 and takes forever
-    # Uses https://www.youtube.com/watch?v=v68zYyaEmEA video's math
-    # But I don't actually understand the implementation of the math in the video
-    # WAIT ITS ALL WRONG
-    """
-    word_scores = {}
-    i = 0
-    for guess_word in words:
-        i += 1
-        start_time = time.time()
-
-        word_scores[guess_word] = 0
-        for answer_word in words:
-            gls, yls, dls = wordle_compare(guess_word, answer_word)
-            not_valid = 0
-            for possible_valid_word in words:
-                not_valid += not is_good_word(possible_valid_word, gls, yls, dls)[0]
-            try:
-                word_scores[guess_word] += ((len(words) - not_valid) / len(words)) * -math.log((len(words) - not_valid) / len(words), 2)
-            except:
-                pass
-
-        time_taken = time.time() - start_time
         print(
             "%i/%i: %.2f \t %s \t %.2f \t %.2f"
             % (
@@ -386,28 +360,6 @@ def calc_best_words(words):
                 time_taken,
             )
         )
-
-    # THIS BLOCK OF CODE IS ABOUT THE SAME SPEED
-    # BUT IT CAN BE SPEED UP BY HALFING THE TABLE
-    # BUT IT STILL WOULD BE REALLY SLOW
-    # AND IT WOULD NEVER "WORK BETTER" THAN THE ABOVE
-    """
-    word_table = {}
-    for guess_word in words:
-        for answer_word in words:
-            word_table[guess_word + answer_word] = wordle_compare(guess_word, answer_word)
-
-    word_scores = {}
-    i = 0
-    for key in word_table:
-        i += 1
-        guess_word = key[:len(key)//2]
-        word_scores[guess_word] = len(words)
-        for possible_valid_word in words:
-            gls, yls, dls = word_table[key]
-            word_scores[guess_word] -= is_good_word(possible_valid_word, gls, yls, dls)[0]
-
-        print("%i/%i: %.5f \t %s \t %i" % (i, len(word_table), i/len(word_table) * 100, guess_word, word_scores[guess_word]))
     """
 
     ws_lst = sorted(word_scores.items(), key=lambda x: x[1], reverse=True) # Sort by highest score = [0]
