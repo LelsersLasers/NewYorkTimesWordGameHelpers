@@ -350,19 +350,29 @@ def calc_best_words(words):
         start_time = time.time()
 
         word_scores[guess_word] = 0
-        pattern_occurrences = {}
+        pattern_occurrences = []
         for answer_word in words:
-            gls, yls, dls = wordle_compare(guess_word, answer_word)
-            try:
-                pattern_occurrences[(gls, yls, dls)] += 1/len(words)
-            except:
-                pattern_occurrences[(gls, yls, dls)] = 1/len(words)
+            key = wordle_compare(guess_word, answer_word) # tuple of gls, yls, dls
+
+            found = False
+            for pattern in pattern_occurrences:
+                if pattern[0] == key:
+                    pattern[1] += 1/len(words)
+                    found = True
+                    break
+            if not found:
+                pattern_occurrences.append([key, 1/len(words)])
+
         for pattern in pattern_occurrences:
-            gls, yls, dls = pattern
-            not_valid = 0
+            gls, yls, dls = pattern[0]
+            valid_word_count = 0
             for possible_valid_word in words:
-                not_valid += not is_good_word(possible_valid_word, gls, yls, dls)[0]
-            word_scores[guess_word] += pattern_occurrences[pattern] * -math.log((len(words) - not_valid) / len(words), 2)
+                valid_word_count += is_good_word(possible_valid_word, gls, yls, dls)[0]
+            
+            try:
+                word_scores[guess_word] += pattern[1] * -math.log(valid_word_count / len(words), 2)
+            except:
+                pass
 
         time_taken = time.time() - start_time
         print(
