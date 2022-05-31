@@ -45,10 +45,10 @@ def bold_text(txt):
 def get_words():
     only_common = input_yes_or_no("Only common words [Y/n]? ")
     if only_common:
-        only_wordle = input_yes_or_no("Use more than only offical Wordle answer words [Y/n]? ")
-        if not only_wordle:
-            return allWords.get_wordle_words()
-        return allWords.get_common_words()
+        not_only_wordle = input_yes_or_no("Use more than only offical Wordle answer words [Y/n]? ")
+        if not_only_wordle:
+            return allWords.get_common_words()
+        return allWords.get_wordle_words()
     return allWords.get_all_words()
 
 

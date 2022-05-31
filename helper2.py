@@ -44,10 +44,10 @@ def clean_word_list(words, word_len, double_letters):
 def get_words():
     only_common = input_yes_or_no("Only common words [Y/n]? ")
     if only_common:
-        only_wordle = input_yes_or_no("Only wordle words [Y/n]? ")
-        if only_wordle:
-            return allWords.get_wordle_words()
-        return allWords.get_common_words()
+        not_only_wordle = input_yes_or_no("Use more than only offical Wordle answer words [Y/n]? ")
+        if not_only_wordle:
+            return allWords.get_common_words()
+        return allWords.get_wordle_words()
     return allWords.get_all_words()
 
 
@@ -200,18 +200,20 @@ def run(all_words, filtered_words, gls, yls, dls):
     dls = input_dark_letters("Enter letters that are not in the word.", dls)
 
     filtered_words = filter_words(filtered_words, gls, yls, dls)
-    print(filtered_words)
 
-    print("\nSEARCHING...")
-    possible_words = calc_best_words(all_words, filtered_words, gls, yls, dls)
-    print("FINISHED SEARCHING...\n")
+    if len(filtered_words) == 1:
+        bold_text("The word is: %s" % filtered_words[0])
+    elif len(filtered_words) > 1:
+        bold_text("The answer could be one of %i words" % len(filtered_words))
+        for word in filtered_words:
+            print("\t%s" % word)
 
-    if len(possible_words) == 1:
-        bold_text("The word is: %s" % possible_words[0][0])
-    elif len(possible_words) > 0:
-        bold_text("Possible Words:")
+        temp = input_yes_or_no("Press enter to continue...\n")
+        
+        possible_words = calc_best_words(all_words, filtered_words, gls, yls, dls)
+        bold_text("Next Guesses:")
         for i in range(len(possible_words) - 1, -1, -1):
-            print("%i) %s" % (i + 1, possible_words[i][0]))
+            print("  %i) %s\t%.5f" % (i + 1, possible_words[i][0], possible_words[i][1]))
     else:
         print("No words found. Did you mis-type or incorrectly enter information?")
 
@@ -324,8 +326,7 @@ def calc_best_words(all_words, filtered_words, gls, yls, dls):
     # """
 
     ws_lst = sorted(word_scores.items(), key=lambda x: x[1], reverse=True) # Sort by highest score = [0]
-    for i in range(len(ws_lst) - 1, -1, -1):
-        print("%i) %s \t %0.3f" % (i + 1, ws_lst[i][0], ws_lst[i][1]))
+    ws_lst = ws_lst[:10]
 
     print("DONE IN %.3f\n" % (time.time() - t0))
 
