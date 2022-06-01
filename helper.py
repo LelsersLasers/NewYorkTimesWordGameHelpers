@@ -257,7 +257,7 @@ def calc_double_letter_weight(words):
     double_letter_words = 0
     for word in words:
         double_letter_words += has_double_letters(word)
-    return double_letter_words / len(words)
+    return 1 - (1 - (double_letter_words / len(words)) / 2)
 
 
 def main():
