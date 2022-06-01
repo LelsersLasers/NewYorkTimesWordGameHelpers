@@ -184,45 +184,6 @@ def is_good_word(word, gls, yls, dls):
     return True
 
 
-def filter_words(words, gls, yls, dls):
-    filtered_words = []
-    for word in words:
-        good = is_good_word(word, gls, yls, dls)
-        if good:
-            filtered_words.append(word)
-    return filtered_words
-
-
-def run(all_words, filtered_words, gls, yls, dls):
-    print("\nENTER INFORMATION...\n")
-
-    gls = input_green_letters(len(all_words[0]), gls)
-    print("\n")
-    yls = input_yellow_letters(len(all_words[0]))
-    print("\n")
-    dls = input_dark_letters("Enter letters that are not in the word.", dls)
-
-    filtered_words = filter_words(filtered_words, gls, yls, dls)
-
-    if len(filtered_words) == 1:
-        bold_text("The word is: %s" % filtered_words[0])
-    elif len(filtered_words) > 1:
-        bold_text("The answer could be one of %i words" % len(filtered_words))
-        for word in filtered_words:
-            print("\t%s" % word)
-
-        temp = input_yes_or_no("Press enter to continue...\n")
-
-        possible_words = calc_best_words(all_words, filtered_words, gls, yls, dls)
-        bold_text("Next Guesses:")
-        for i in range(len(possible_words) - 1, -1, -1):
-            print(
-                "  %i) %s\t%.5f" % (i + 1, possible_words[i][0], possible_words[i][1])
-            )
-    else:
-        print("No words found. Did you mis-type or incorrectly enter information?")
-
-
 def wordle_compare(answer, guess):
     # ARE THEY BACKWARDS? ONLY THINKG THT WOULD CHANGE IS THE DLS AND MAYBE WHERE THE YLS ARE NOT
     letter_lst = list(answer)
@@ -241,10 +202,66 @@ def wordle_compare(answer, guess):
     return gls, yls, dls
 
 
+def filter_words(words, gls, yls, dls):
+    filtered_words = []
+    for word in words:
+        good = is_good_word(word, gls, yls, dls)
+        if good:
+            filtered_words.append(word)
+    return filtered_words
+
+
+def run(all_words, filtered_words, letter_counts, letter_weights, gls, yls, dls):
+    print("\nENTER INFORMATION...\n")
+
+    gls = input_green_letters(len(all_words[0]), gls)
+    print("\n")
+    yls = input_yellow_letters(len(all_words[0]))
+    print("\n")
+    dls = input_dark_letters("Enter letters that are not in the word.", dls)
+
+    print("")
+
+    filtered_words = filter_words(filtered_words, gls, yls, dls)
+
+    if len(filtered_words) == 1:
+        bold_text("The word is: %s" % filtered_words[0])
+    elif len(filtered_words) > 1:
+        bold_text("The answer could be one of %i words" % len(filtered_words))
+        should_show = len(filtered_words) < 10 or input_yes_or_no("Would you like to see those words [Y/n]? ")
+        if should_show:
+            ranked_words = rank_words(filtered_words, letter_counts, letter_weights)
+            for i in range(len(ranked_words) - 1, -1, -1):
+                print("%i) %s" % (i + 1, ranked_words[i][0]))
+            temp = input_yes_or_no("Press enter to continue...\n")
+
+        possible_words = calc_best_words(all_words, filtered_words, gls, yls, dls)
+        bold_text("Next Guesses:")
+        for i in range(len(possible_words) - 1, -1, -1):
+            print(
+                "%2i) %s\t%.5f" % (i + 1, possible_words[i][0], possible_words[i][1])
+            )
+    else:
+        print("No words found. Did you mis-type or incorrectly enter information?")
+
+
+def rank_words(words, letter_counts, letter_weights):
+    word_scores = {}
+    for word in words:
+        word_scores[word] = 0
+        for i in range(len(word)):
+            word_scores[word] += letter_counts[ALPHABET.index(word[i])][0] * letter_weights["yellow"]
+            word_scores[word] += letter_counts[ALPHABET.index(word[i])][1][i] * letter_weights["green"]
+        if has_double_letters(word):
+                word_scores[word] *= letter_weights["double"]
+    ranked_words = sorted(word_scores.items(), key=lambda x: x[1], reverse=True)
+    return ranked_words
+
+
+
 def calc_best_words(all_words, filtered_words, gls, yls, dls):
     print("\nSTARTING CALCULATIONS...")
     t0 = time.time()
-    # Once this works: guess_words should be unfiltered and answer/possible should be filtered
 
     # THIS MIGHT WORK, BUT IT TAKES FOREVER, SO IDK IF IT WORKS
     """
@@ -281,9 +298,9 @@ def calc_best_words(all_words, filtered_words, gls, yls, dls):
     # I think this works
     # Its a lot faster, but still really slow
     # Uses https://www.youtube.com/watch?v=v68zYyaEmEA video's math
-    # """
     word_scores = {}
     i = 0
+    oof = []
     for guess_word in all_words:
         i += 1
         start_time = time.time()
@@ -296,12 +313,11 @@ def calc_best_words(all_words, filtered_words, gls, yls, dls):
             found = False
             for pattern in pattern_occurrences:
                 if pattern[0] == key:
-                    pattern[1] += 1 / len(all_words)
+                    pattern[1] += 1 / len(filtered_words)
                     found = True
                     break
             if not found:
-                pattern_occurrences.append([key, 1 / len(all_words)])
-
+                pattern_occurrences.append([key, 1 / len(filtered_words)])
         for pattern in pattern_occurrences:
             new_gls, new_yls, new_dls = pattern[0]
             # new_gls += gls
@@ -309,11 +325,13 @@ def calc_best_words(all_words, filtered_words, gls, yls, dls):
             # new_dls += dls
             valid_word_count = 0
             for possible_valid_word in filtered_words:
-                valid_word_count += is_good_word(
-                    possible_valid_word, new_gls, new_yls, new_dls
-                )
-
+                good_word =  is_good_word(possible_valid_word, new_gls, new_yls, new_dls)
+                valid_word_count += good_word
+                if good_word and possible_valid_word == guess_word:
+                    valid_word_count -= 1
             try:
+                if valid_word_count < 0:
+                    oof.appen([guess_word, valid_word_count])
                 word_scores[guess_word] += pattern[1] * -math.log(
                     valid_word_count / len(filtered_words), 2
                 )
@@ -332,19 +350,46 @@ def calc_best_words(all_words, filtered_words, gls, yls, dls):
                 time_taken,
             )
         )
-    # """
 
     ws_lst = sorted(
         word_scores.items(), key=lambda x: x[1], reverse=True
     )  # Sort by highest score = [0]
     ws_lst = ws_lst[:10]
 
-    print("DONE IN %.3f\n" % (time.time() - t0))
+    print("DONE IN %.3f seconds\n" % (time.time() - t0))
+    for o in oof:
+        print(o)
 
     return ws_lst
 
+def calc_double_letter_weight(words):
+    double_letter_words = 0
+    for word in words:
+        double_letter_words += has_double_letters(word)
+    return 1 - (1 - (double_letter_words / len(words)) / 2)
+
+
+def calc_letter_counts(words):
+    letter_counts = []
+    for i in range(len(ALPHABET)):
+        temp = [0] * len(words[0])
+        letter_counts.append([0, temp])
+
+    for word in words:
+        for i in range(len(word)):
+            letter_counts[ALPHABET.index(word[i])][0] += 1
+            letter_counts[ALPHABET.index(word[i])][1][i] += 1
+    return letter_counts
+
 
 def main():
+
+    letter_weights = {
+        "yellow": 4,
+        "green": 1,
+        "double": -1
+    }
+
     print("\nPROGRAM STARTING...\n")
     bold_text("Welcome to the wordle helper!")
 
@@ -356,6 +401,10 @@ def main():
     double_letters = input_yes_or_no("Could there be double letters [Y/n]? ")
 
     words = clean_word_list(words, word_len, double_letters)
+
+    if double_letters:
+        letter_weights["double"] = calc_double_letter_weight(words)
+    letter_counts = calc_letter_counts(words)
 
     print("\n")
     want_best_word = input_yes_or_no(
@@ -372,7 +421,7 @@ def main():
 
     running = True
     while running:
-        run(words, filtered_words, gls, yls, dls)
+        run(words, filtered_words, letter_counts, letter_weights, gls, yls, dls)
         print("\n")
         running = input_yes_or_no("Run again [Y/n]? ")
 
