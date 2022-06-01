@@ -41,13 +41,14 @@ def clean_word_list(words, word_len, double_letters):
     return filtered_words
 
 
-def get_words():
+def get_words(word_len):
     only_common = input_yes_or_no("Only common words [Y/n]? ")
     if only_common:
-        not_only_wordle = input_yes_or_no("Use more than only offical Wordle answer words [Y/n]? ")
-        if not_only_wordle:
-            return allWords.get_common_words()
-        return allWords.get_wordle_words()
+        if word_len == 5:
+            not_only_wordle = input_yes_or_no("Use more than only offical Wordle answer words [Y/n]? ")
+            if not not_only_wordle:
+                return allWords.get_wordle_words()
+        return allWords.get_common_words()
     return allWords.get_all_words()
 
 
@@ -311,18 +312,18 @@ def calc_best_words(all_words, filtered_words, gls, yls, dls):
             except:
                 pass
 
-        # time_taken = time.time() - start_time
-        # print(
-        #     "%i/%i: %.2f%% \t%s\tI: %.2f \t %.2f sec"
-        #     % (
-        #         i,
-        #         len(all_words),
-        #         i / len(all_words) * 100,
-        #         guess_word,
-        #         word_scores[guess_word],
-        #         time_taken,
-        #     )
-        # )
+        time_taken = time.time() - start_time
+        print(
+            "%i/%i: %.2f%% \t%s\tI: %.2f \t %.2f sec"
+            % (
+                i,
+                len(all_words),
+                i / len(all_words) * 100,
+                guess_word,
+                word_scores[guess_word],
+                time_taken,
+            )
+        )
     # """
 
     ws_lst = sorted(word_scores.items(), key=lambda x: x[1], reverse=True) # Sort by highest score = [0]
@@ -340,7 +341,7 @@ def main():
     print("\n")
     word_len = input_word_len()
     print("\n")
-    words = get_words()
+    words = get_words(word_len)
     print("\n")
     double_letters = input_yes_or_no("Could there be double letters [Y/n]? ")
 

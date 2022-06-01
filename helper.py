@@ -42,13 +42,14 @@ def bold_text(txt):
     print("#" * (len(txt) + 4))
 
 
-def get_words():
+def get_words(word_len):
     only_common = input_yes_or_no("Only common words [Y/n]? ")
     if only_common:
-        not_only_wordle = input_yes_or_no("Use more than only offical Wordle answer words [Y/n]? ")
-        if not_only_wordle:
-            return allWords.get_common_words()
-        return allWords.get_wordle_words()
+        if word_len == 5:
+            not_only_wordle = input_yes_or_no("Use more than only offical Wordle answer words [Y/n]? ")
+            if not not_only_wordle:
+                return allWords.get_wordle_words()
+        return allWords.get_common_words()
     return allWords.get_all_words()
 
 
@@ -264,7 +265,7 @@ def main():
     print("\n")
     word_len = input_word_len()
     print("\n")
-    words = get_words()
+    words = get_words(word_len)
     print("\n")
     double_letters = input_yes_or_no("Could there be double letters [Y/n]? ")
 
