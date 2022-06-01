@@ -45,7 +45,9 @@ def get_words(word_len):
     only_common = input_yes_or_no("Only common words [Y/n]? ")
     if only_common:
         if word_len == 5:
-            not_only_wordle = input_yes_or_no("Use more than only offical Wordle answer words [Y/n]? ")
+            not_only_wordle = input_yes_or_no(
+                "Use more than only offical Wordle answer words [Y/n]? "
+            )
             if not not_only_wordle:
                 return allWords.get_wordle_words()
         return allWords.get_common_words()
@@ -210,11 +212,13 @@ def run(all_words, filtered_words, gls, yls, dls):
             print("\t%s" % word)
 
         temp = input_yes_or_no("Press enter to continue...\n")
-        
+
         possible_words = calc_best_words(all_words, filtered_words, gls, yls, dls)
         bold_text("Next Guesses:")
         for i in range(len(possible_words) - 1, -1, -1):
-            print("  %i) %s\t%.5f" % (i + 1, possible_words[i][0], possible_words[i][1]))
+            print(
+                "  %i) %s\t%.5f" % (i + 1, possible_words[i][0], possible_words[i][1])
+            )
     else:
         print("No words found. Did you mis-type or incorrectly enter information?")
 
@@ -287,16 +291,16 @@ def calc_best_words(all_words, filtered_words, gls, yls, dls):
         word_scores[guess_word] = 0
         pattern_occurrences = []
         for answer_word in filtered_words:
-            key = wordle_compare(guess_word, answer_word) # tuple of gls, yls, dls
+            key = wordle_compare(guess_word, answer_word)  # tuple of gls, yls, dls
 
             found = False
             for pattern in pattern_occurrences:
                 if pattern[0] == key:
-                    pattern[1] += 1/len(all_words)
+                    pattern[1] += 1 / len(all_words)
                     found = True
                     break
             if not found:
-                pattern_occurrences.append([key, 1/len(all_words)])
+                pattern_occurrences.append([key, 1 / len(all_words)])
 
         for pattern in pattern_occurrences:
             new_gls, new_yls, new_dls = pattern[0]
@@ -305,10 +309,14 @@ def calc_best_words(all_words, filtered_words, gls, yls, dls):
             # new_dls += dls
             valid_word_count = 0
             for possible_valid_word in filtered_words:
-                valid_word_count += is_good_word(possible_valid_word, new_gls, new_yls, new_dls)
-            
+                valid_word_count += is_good_word(
+                    possible_valid_word, new_gls, new_yls, new_dls
+                )
+
             try:
-                word_scores[guess_word] += pattern[1] * -math.log(valid_word_count / len(filtered_words), 2)
+                word_scores[guess_word] += pattern[1] * -math.log(
+                    valid_word_count / len(filtered_words), 2
+                )
             except:
                 pass
 
@@ -326,7 +334,9 @@ def calc_best_words(all_words, filtered_words, gls, yls, dls):
         )
     # """
 
-    ws_lst = sorted(word_scores.items(), key=lambda x: x[1], reverse=True) # Sort by highest score = [0]
+    ws_lst = sorted(
+        word_scores.items(), key=lambda x: x[1], reverse=True
+    )  # Sort by highest score = [0]
     ws_lst = ws_lst[:10]
 
     print("DONE IN %.3f\n" % (time.time() - t0))

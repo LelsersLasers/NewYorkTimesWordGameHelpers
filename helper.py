@@ -46,7 +46,9 @@ def get_words(word_len):
     only_common = input_yes_or_no("Only common words [Y/n]? ")
     if only_common:
         if word_len == 5:
-            not_only_wordle = input_yes_or_no("Use more than only offical Wordle answer words [Y/n]? ")
+            not_only_wordle = input_yes_or_no(
+                "Use more than only offical Wordle answer words [Y/n]? "
+            )
             if not not_only_wordle:
                 return allWords.get_wordle_words()
         return allWords.get_common_words()
