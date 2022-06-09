@@ -228,7 +228,9 @@ def run(all_words, filtered_words, letter_counts, letter_weights, gls, yls, dls)
         bold_text("The word is: %s" % filtered_words[0])
     elif len(filtered_words) > 1:
         bold_text("The answer could be one of %i words" % len(filtered_words))
-        should_show = len(filtered_words) < 10 or input_yes_or_no("Would you like to see those words [Y/n]? ")
+        should_show = len(filtered_words) < 10 or input_yes_or_no(
+            "Would you like to see those words [Y/n]? "
+        )
         if should_show:
             ranked_words = rank_words(filtered_words, letter_counts, letter_weights)
             for i in range(len(ranked_words) - 1, -1, -1):
@@ -238,9 +240,7 @@ def run(all_words, filtered_words, letter_counts, letter_weights, gls, yls, dls)
         possible_words = calc_best_words(all_words, filtered_words, gls, yls, dls)
         bold_text("Next Guesses:")
         for i in range(len(possible_words) - 1, -1, -1):
-            print(
-                "%2i) %s\t%.5f" % (i + 1, possible_words[i][0], possible_words[i][1])
-            )
+            print("%2i) %s\t%.5f" % (i + 1, possible_words[i][0], possible_words[i][1]))
     else:
         print("No words found. Did you mis-type or incorrectly enter information?")
 
@@ -250,13 +250,16 @@ def rank_words(words, letter_counts, letter_weights):
     for word in words:
         word_scores[word] = 0
         for i in range(len(word)):
-            word_scores[word] += letter_counts[ALPHABET.index(word[i])][0] * letter_weights["yellow"]
-            word_scores[word] += letter_counts[ALPHABET.index(word[i])][1][i] * letter_weights["green"]
+            word_scores[word] += (
+                letter_counts[ALPHABET.index(word[i])][0] * letter_weights["yellow"]
+            )
+            word_scores[word] += (
+                letter_counts[ALPHABET.index(word[i])][1][i] * letter_weights["green"]
+            )
         if has_double_letters(word):
-                word_scores[word] *= letter_weights["double"]
+            word_scores[word] *= letter_weights["double"]
     ranked_words = sorted(word_scores.items(), key=lambda x: x[1], reverse=True)
     return ranked_words
-
 
 
 def calc_best_words(all_words, filtered_words, gls, yls, dls):
@@ -274,12 +277,12 @@ def calc_best_words(all_words, filtered_words, gls, yls, dls):
         word_scores[guess_word] = 0
         for answer_word in filtered_words:
             new_gls, new_yls, new_dls = wordle_compare(guess_word, answer_word)
-            new_gls += gls
-            new_yls += yls
-            new_dls += dls
+            # new_gls += gls
+            # new_yls += yls
+            # new_dls += dls
             for possible_valid_word in filtered_words:
-                word_scores[guess_word] += is_good_word(possible_valid_word, new_gls, new_yls, new_dls)
-        word_scores[guess_word] = -math.log(word_scores[guess_word] / (len(all_words) * len(filtered_words)), 2) # convert to bits of information
+                word_scores[guess_word] += not is_good_word(possible_valid_word, new_gls, new_yls, new_dls)
+        # word_scores[guess_word] = -math.log(word_scores[guess_word] / (len(all_words) * len(filtered_words)), 2) # convert to bits of information
 
         time_taken = time.time() - start_time
         print(
@@ -300,7 +303,7 @@ def calc_best_words(all_words, filtered_words, gls, yls, dls):
     # Uses https://www.youtube.com/watch?v=v68zYyaEmEA video's math
     word_scores = {}
     i = 0
-    oof = []
+    # oof = []
     for guess_word in all_words:
         i += 1
         start_time = time.time()
@@ -325,13 +328,13 @@ def calc_best_words(all_words, filtered_words, gls, yls, dls):
             # new_dls += dls
             valid_word_count = 0
             for possible_valid_word in filtered_words:
-                good_word =  is_good_word(possible_valid_word, new_gls, new_yls, new_dls)
+                good_word = is_good_word(possible_valid_word, new_gls, new_yls, new_dls)
                 valid_word_count += good_word
                 if good_word and possible_valid_word == guess_word:
                     valid_word_count -= 1
             try:
-                if valid_word_count < 0:
-                    oof.appen([guess_word, valid_word_count])
+                # if valid_word_count < 1 and guess_word in filtered_words:
+                #     oof.append([guess_word, valid_word_count])
                 word_scores[guess_word] += pattern[1] * -math.log(
                     valid_word_count / len(filtered_words), 2
                 )
@@ -356,11 +359,21 @@ def calc_best_words(all_words, filtered_words, gls, yls, dls):
     )  # Sort by highest score = [0]
     ws_lst = ws_lst[:10]
 
-    print("DONE IN %.3f seconds\n" % (time.time() - t0))
-    for o in oof:
-        print(o)
+    print("DONE IN %.2f seconds" % (time.time() - t0))
+    print("Advanced search info:")
+    print("- Total guessable words: %i" % len(all_words))
+    print("- Total possible answer words words: %i" % len(filtered_words))
+    print("- Total possible answer words: %i" % len(ws_lst))
+    print(
+        "- Information (bits) of possible answer words: %.2f\n"
+        % math.log(len(filtered_words), 2)
+    )
+
+    # for o in oof:
+    #     print(o)
 
     return ws_lst
+
 
 def calc_double_letter_weight(words):
     double_letter_words = 0
@@ -384,11 +397,7 @@ def calc_letter_counts(words):
 
 def main():
 
-    letter_weights = {
-        "yellow": 4,
-        "green": 1,
-        "double": -1
-    }
+    letter_weights = {"yellow": 4, "green": 1, "double": -1}
 
     print("\nPROGRAM STARTING...\n")
     bold_text("Welcome to the wordle helper!")

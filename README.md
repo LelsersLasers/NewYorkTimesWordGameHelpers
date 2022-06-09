@@ -24,5 +24,4 @@ It also works on any sized wordle (site: <http://64.98.192.41:8000/wordle/>)
 # Todo
 
 helper2.py
-    - Rank filtered words the same way helper.py does
-    - If entropy is tried, rank the same way helper.py does
+- If entropy is tried, rank the same way helper.py does
