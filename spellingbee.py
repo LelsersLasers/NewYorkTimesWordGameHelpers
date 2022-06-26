@@ -4,15 +4,6 @@ import allWords
 ALPHABET = list("abcdefghijklmnopqrstuvwxyz")
 
 
-def remove_dups(lst):
-    no_dups = []
-    for e in lst:
-        if e not in no_dups:
-            no_dups.append(e)
-    no_dups.sort()
-    return no_dups
-
-
 def bold_text(txt):
     print("#" * (len(txt) + 4))
     print("# " + txt + " #")
@@ -25,6 +16,17 @@ def get_words():
         return allWords.get_all_words()
     return allWords.get_common_words()
 
+
+def get_file_path():
+    print("Enter a file path to save the outputted words to.")
+    print("The file does not have to exist, and it should likely end with '.txt'.")
+    try:
+        user_input = input("File path (leave blank for default): ")
+        assert len(user_input) > 0
+        return user_input
+    except:
+        return "spelling_bee_output.txt"
+    
 
 def input_yes_or_no(prompt):
     try:
@@ -63,7 +65,6 @@ def input_grey_letters():
 
 
 def is_good_word(word, yl, gls):
-
     if len(word) < 4:
         return False
 
@@ -98,14 +99,20 @@ def main():
     yl = input_yellow_letter()
     print("\n")
     gls = input_grey_letters()
+    print("\n")
+    output_path = get_file_path()
 
     print("\nSEARCHING...")
     good_words = calc_possible_words(words, yl, gls)
     print("FINISHED SEARCHING...\n")
 
     if len(good_words) > 0:
-        bold_text("Words:")
-        for i in range(len(good_words) - 1, -1, -1):
+        out_str = "\n".join(good_words)
+        with open(output_path, "w") as out_file:
+            out_file.write(out_str)
+
+        bold_text("%i words found:" % len(good_words))
+        for i in range(len(good_words)):
             print("%i) %s" % (i + 1, good_words[i]))
     else:
         print("No words found. Did you mis-type or incorrectly enter information?")
