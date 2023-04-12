@@ -4,7 +4,7 @@ CLI tools that helps you solve the word games on [The New York Times website](ht
 
 ## Wordle
 
-This tool works with [The New York Times offical Wordle](https://www.nytimes.com/games/wordle/index.html) but many other wordles as well such as [this one](http://64.98.192.41:8000/wordle/).
+This tool works with [The New York Times offical Wordle](https://www.nytimes.com/games/wordle/index.html) but many other wordles as well such as [this one](http://64.98.192.13:8000/wordle/).
 It works with any size wordle, as long as the standard rules for the game apply (like how the yellow, green, etc, letters are scored).
 
 There are two versions of the tool available:
