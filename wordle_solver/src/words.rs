@@ -45,10 +45,10 @@ impl Word {
 #[derive(Debug)]
 pub struct WordScore {
     pub word: Word,
-    pub score: u32,
+    pub score: f32,
 }
 impl WordScore {
-    pub fn new(word: Word, score: u32) -> WordScore {
+    pub fn new(word: Word, score: f32) -> WordScore {
         WordScore { word, score }
     }
 }

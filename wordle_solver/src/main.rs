@@ -18,17 +18,40 @@ fn best_word(words: &[words::Word]) -> words::Word {
 
     let mut word_scores = words
         .par_iter()
+        // .iter()
         .map(|guess_word| {
-            let mut score = 0;
+            let mut score = 0.0;
             for answer_word in words {
                 let compared = compare::CompareResult::from_compare(guess_word, answer_word);
 
+                let mut eleminated = 0;
                 for check_word in words {
                     let valid = compared.word_is_valid(check_word);
                     if !valid {
-                        score += 1;
+                        eleminated += 1;
                     }
                 }
+
+                // I = -log2(p)
+                // want eleminates to be bigger -> p to be smaller -> I to be bigger
+                let eleminated_percent = eleminated as f32 / word_count as f32;
+                let p = 1.0 - eleminated_percent;
+                let bits = -p.log2();
+                if bits.is_infinite() {
+                    println!(
+                        "{} {} {} {} {} {} {:?}",
+                        eleminated,
+                        word_count,
+                        p,
+                        bits,
+                        guess_word.word,
+                        answer_word.word,
+                        compared
+                    );
+                    panic!("bits is infinite")
+                }
+                // score += eleminated_percent * bits;
+                score += bits / word_count as f32;
             }
 
             let word_score = words::WordScore::new(guess_word.clone(), score);
@@ -45,33 +68,8 @@ fn best_word(words: &[words::Word]) -> words::Word {
         })
         .collect::<Vec<words::WordScore>>();
 
-    // for guess_word in words {
-    //     i += 1;
-    //     let mut score = 0;
-    //     for answer_word in words {
-    //         let compared = compare::CompareResult::from_compare(guess_word, answer_word);
-
-    //         for check_word in words {
-    //             let valid = compared.word_is_valid(check_word);
-    //             if !valid {
-    //                 score += 1;
-    //             }
-    //         }
-    //     }
-
-    //     let word_score = words::WordScore::new(guess_word.clone(), score);
-
-    //     println!(
-    //         "{} / {} ({}) - {:?}",
-    //         i,
-    //         word_count,
-    //         i as f32 / word_count as f32,
-    //         word_score
-    //     );
-    //     word_scores.push(word_score);
-    // }
-
-    word_scores.sort_by(|a, b| a.score.cmp(&b.score));
+    // higher score = first
+    word_scores.sort_by(|a, b| b.score.partial_cmp(&a.score).unwrap());
 
     let duration = start.elapsed();
 
@@ -95,7 +93,8 @@ fn main() {
         let duplicate_letters = inputs::input_duplicate_letters();
 
         // let all_words = words::Word::from_file("words/all_words.txt");
-        let all_words = words::Word::from_file("words/common_words.txt");
+        // let all_words = words::Word::from_file("words/common_words.txt");
+        let all_words = words::Word::from_file("words/wordle_words.txt");
         all_words
             .into_iter()
             .filter(|word| word.is_valid(word_len, duplicate_letters))
@@ -104,12 +103,12 @@ fn main() {
     let _best_word = best_word(&words);
 
     // let guess_word = words::Word {
-    //     word: "overs".to_string(),
+    //     word: "aback".to_string(),
     //     length: 5,
     //     duplicate_letters: true,
     // };
     // let answer_word = words::Word {
-    //     word: "achoo".to_string(),
+    //     word: "drama".to_string(),
     //     length: 5,
     //     duplicate_letters: true,
     // };
