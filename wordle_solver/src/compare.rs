@@ -39,96 +39,42 @@ impl CompareResult {
             }
         }
 
-        /*
-            aback drama
-            green - a: 2
-            ab_ck dr_ma
-
-            if (ab_ck[0] = a) in dr_ma
-                a -> !1
-
-            yellow - a: !1
-
-
-            grey - b, c, k
-
-        */
-
         // YELLOWS
         for guess_letter in guess_letters_left.clone() {
-            let mut positions = Vec::with_capacity(guess_letters_left.len());
+            if yellow_letters
+                .iter()
+                .any(|yellow_letter| yellow_letter.letter == guess_letter)
+            {
+                continue;
+            }
             for answer_letter in &answer_letters_left {
                 if &guess_letter == answer_letter {
-                    let mut pos = None;
-                    for (index, letter) in guess_letters.iter().enumerate() {
-                        if letter == answer_letter {
-                            if positions.iter().any(|&p| p == index) {
-                                continue;
-                            }
-                            pos = Some(index);
-                            break;
-                        }
-                    }
-                    if let Some(pos) = pos {
-                        positions.push(pos);
+                    let maybe_pos = guess_letters
+                        .iter()
+                        .enumerate()
+                        .position(|(index, letter)| {
+                            letter == &guess_letter
+                                && !yellow_letters.iter().any(|yellow_letter| {
+                                    yellow_letter.letter == guess_letter
+                                        && yellow_letter.position == index
+                                })
+                                && !green_letters.iter().any(|green_letter| {
+                                    green_letter.letter == guess_letter
+                                        && green_letter.position == index
+                                })
+                        });
+                    if let Some(pos) = maybe_pos {
+                        yellow_letters.push(YellowLetter::new(guess_letter, pos));
+
+                        let pos = guess_letters_left
+                            .iter()
+                            .position(|letter| letter == &guess_letter)
+                            .unwrap();
+                        guess_letters_left.remove(pos);
                     }
                 }
             }
-
-            if !positions.is_empty() {
-                let pos = guess_letters_left
-                    .iter()
-                    .position(|letter| letter == &guess_letter)
-                    .unwrap();
-                guess_letters_left.remove(pos);
-
-                positions.shrink_to_fit();
-                yellow_letters.push(YellowLetter::new(guess_letter, positions));
-            }
         }
-
-        // for guess_letter in guess_letters_left.clone() {
-        //     // if yellow_letters
-        //     //     .iter()
-        //     //     .any(|yellow_letter| yellow_letter.letter == guess_letter)
-        //     // {
-        //     //     let pos = guess_letters_left
-        //     //         .iter()
-        //     //         .position(|letter| letter == &guess_letter)
-        //     //         .unwrap();
-        //     //     guess_letters_left.remove(pos);
-        //     //     continue;
-        //     // }
-        //     // let mut positions = Vec::new();
-        //     let mut positions = Vec::with_capacity(guess_letters_left.len());
-        //     for answer_letter in &answer_letters_left {
-        //         if &guess_letter == answer_letter {
-        //             let mut pos = None;
-        //             for (index, letter) in guess_letters.iter().enumerate() {
-        //                 if letter == answer_letter {
-        //                     if positions.iter().any(|&p| p == index) {
-        //                         continue;
-        //                     }
-        //                     pos = Some(index);
-        //                 }
-        //             }
-        //             if let Some(pos) = pos {
-        //                 positions.push(pos);
-        //             }
-        //         }
-        //     }
-
-        //     if !positions.is_empty() {
-        //         let pos = guess_letters_left
-        //             .iter()
-        //             .position(|letter| letter == &guess_letter)
-        //             .unwrap();
-        //         guess_letters_left.remove(pos);
-
-        //         positions.shrink_to_fit();
-        //         yellow_letters.push(YellowLetter::new(guess_letter, positions));
-        //     }
-        // }
 
         // GREYS
         for guess_letter in guess_letters_left {
@@ -171,10 +117,8 @@ impl CompareResult {
             if !letter_list_left.contains(&yellow_letter.letter) {
                 return false;
             }
-            for pos in &yellow_letter.positions {
-                if letter_list[*pos] == yellow_letter.letter {
-                    return false;
-                }
+            if letter_list[yellow_letter.position] == yellow_letter.letter {
+                return false;
             }
             let pos = letter_list_left
                 .iter()
@@ -207,11 +151,11 @@ impl GreenLetter {
 #[derive(Debug)]
 pub struct YellowLetter {
     letter: char,
-    positions: Vec<usize>,
+    position: usize,
 }
 impl YellowLetter {
-    pub fn new(letter: char, positions: Vec<usize>) -> Self {
-        Self { letter, positions }
+    pub fn new(letter: char, position: usize) -> Self {
+        Self { letter, position }
     }
 }
 #[derive(Debug)]

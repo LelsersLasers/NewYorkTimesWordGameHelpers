@@ -1,3 +1,5 @@
+use std::fmt;
+
 #[derive(Debug, Clone)]
 pub struct Word {
     pub word: String,
@@ -50,6 +52,11 @@ pub struct WordScore {
 impl WordScore {
     pub fn new(word: Word, score: f32) -> WordScore {
         WordScore { word, score }
+    }
+}
+impl fmt::Display for WordScore {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        write!(f, "{} - {:.2}", self.word.word, self.score)
     }
 }
 

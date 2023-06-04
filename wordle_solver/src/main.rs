@@ -14,8 +14,6 @@ fn best_word(words: &[words::Word]) -> words::Word {
     let word_count = words.len();
     let i = std::sync::atomic::AtomicUsize::new(0);
 
-    // let mut word_scores = Vec::new();
-
     let mut word_scores = words
         .par_iter()
         // .iter()
@@ -37,6 +35,7 @@ fn best_word(words: &[words::Word]) -> words::Word {
                 let eleminated_percent = eleminated as f32 / word_count as f32;
                 let p = 1.0 - eleminated_percent;
                 let bits = -p.log2();
+
                 if bits.is_infinite() {
                     println!(
                         "{} {} {} {} {} {} {:?}",
@@ -50,7 +49,7 @@ fn best_word(words: &[words::Word]) -> words::Word {
                     );
                     panic!("bits is infinite")
                 }
-                // score += eleminated_percent * bits;
+
                 score += bits / word_count as f32;
             }
 
@@ -58,7 +57,7 @@ fn best_word(words: &[words::Word]) -> words::Word {
 
             let val = i.fetch_add(1, std::sync::atomic::Ordering::SeqCst);
             println!(
-                "{} / {} ({:.2}%) - {:?}",
+                "{} / {} ({:.2}%) : {}",
                 val,
                 word_count,
                 (val as f32 / word_count as f32) * 100.0,
@@ -76,8 +75,9 @@ fn best_word(words: &[words::Word]) -> words::Word {
     println!("DONE!");
     println!("\n\nTime elapsed: {} secs\n", duration.as_secs());
 
-    for word_score in word_scores.iter().take(20.min(word_count)) {
-        println!("{:?}", word_score);
+    println!("Best words:");
+    for word_score in word_scores.iter().take(20.min(word_count)).rev() {
+        println!("{}", word_score);
     }
 
     let best_word = word_scores.first().unwrap();
@@ -103,12 +103,12 @@ fn main() {
     let _best_word = best_word(&words);
 
     // let guess_word = words::Word {
-    //     word: "aback".to_string(),
+    //     word: "speed".to_string(),
     //     length: 5,
     //     duplicate_letters: true,
     // };
     // let answer_word = words::Word {
-    //     word: "drama".to_string(),
+    //     word: "crepe".to_string(),
     //     length: 5,
     //     duplicate_letters: true,
     // };
