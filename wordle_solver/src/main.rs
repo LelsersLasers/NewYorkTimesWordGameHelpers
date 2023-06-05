@@ -12,7 +12,7 @@ fn best_word(words: &[words::Word]) -> words::Word {
     let start = Instant::now();
 
     let word_count = words.len();
-    let i = std::sync::atomic::AtomicUsize::new(0);
+    let i = std::sync::atomic::AtomicUsize::new(1);
 
     let mut word_scores = words
         .par_iter()
@@ -89,12 +89,16 @@ fn main() {
     println!("\nPROGRAM STARTING...\n");
 
     let words = {
-        let word_len = inputs::input_word_len();
+        let word_list = inputs::input_word_len();
+        let words_file = word_list.file();
+        let word_len = match word_list {
+            inputs::WordList::All { length } => length,
+            inputs::WordList::Common { length } => length,
+            inputs::WordList::Wordle => 5,
+        };
         let duplicate_letters = inputs::input_duplicate_letters();
 
-        // let all_words = words::Word::from_file("words/all_words.txt");
-        // let all_words = words::Word::from_file("words/common_words.txt");
-        let all_words = words::Word::from_file("words/wordle_words.txt");
+        let all_words = words::Word::from_file(words_file);
         all_words
             .into_iter()
             .filter(|word| word.is_valid(word_len, duplicate_letters))

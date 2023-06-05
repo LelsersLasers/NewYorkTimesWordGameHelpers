@@ -1,5 +1,20 @@
 use std::io::{self, Write};
 
+pub enum WordList {
+    All { length: usize },
+    Common { length: usize},
+    Wordle, // always 5 letters
+}
+impl WordList {
+    pub fn file(&self) -> &str {
+        match self {
+            Self::All { .. } => "words/common_words.txt",
+            Self::Common { .. } => "words/common_words.txt",
+            Self::Wordle => "words/wordle_words.txt",
+        }
+    }
+}
+
 fn word_len_recusive() -> usize {
     print!("Length: ");
     io::stdout().flush().unwrap();
@@ -19,20 +34,39 @@ fn word_len_recusive() -> usize {
     }
 }
 
-pub fn input_word_len() -> usize {
+pub fn input_word_len() -> WordList {
     println!("\nHow many letters are in the word?");
-    word_len_recusive()
+    let length = word_len_recusive();
+
+    if length == 5 {
+        let not_only_wordle = yes_or_no("\nMore than just wordle words [Y/n]? ");
+        if !not_only_wordle {
+            return WordList::Wordle;
+        }
+    }
+
+    let only_common = yes_or_no("\nOnly common words [Y/n]? ");
+
+    if only_common {
+        WordList::Common { length }
+    } else {
+        WordList::All { length }
+    }
 }
 
 pub fn input_duplicate_letters() -> bool {
-    print!("\nCould there be double letters [Y/n]? ");
+    yes_or_no("\nCould there be double letters [Y/n]? ")
+}
+
+fn yes_or_no(prompt: &str) -> bool {
+    print!("{}", prompt);
     io::stdout().flush().unwrap();
 
-    let mut duplicate_letters_input = String::new();
+    let mut input = String::new();
     std::io::stdin()
-        .read_line(&mut duplicate_letters_input)
+        .read_line(&mut input)
         .expect("Failed to read line");
 
-    let duplicate_letters = duplicate_letters_input.trim().to_lowercase();
-    duplicate_letters == "y"
+    let first_letter = input.trim().to_lowercase().chars().next().unwrap_or('y');
+    first_letter != 'n'
 }
