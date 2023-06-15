@@ -4,7 +4,7 @@ CLI tools that helps you solve the word games on [The New York Times website](ht
 
 ## Wordle
 
-This tool works with [The New York Times offical Wordle](https://www.nytimes.com/games/wordle/index.html) but many other wordles as well such as [this one](http://64.98.192.13:8000/wordle/).
+This tool works with [The New York Times offical Wordle](https://www.nytimes.com/games/wordle/index.html) but many other wordles as well such as [this one](http://lelserslasers.pythonanywhere.com/wordle/).
 It works with any size wordle, as long as the standard rules for the game apply (like how the yellow, green, etc, letters are scored).
 
 There are two versions of the tool available:
@@ -20,7 +20,7 @@ A more "reasonable" example of the tool solving offical Wordle in 4 guesses for 
 The tool works on any site that uses the normal Wordle rules for the green/yellow/dark letters (site: <http://64.98.192.13:8000/wordle/>)
 ![Helper Tool for other sites](https://github.com/LelsersLasers/WordleHelper/raw/main/showcase/works_on_other_sites.PNG)
 
-It also works on any sized wordle (site: <http://64.98.192.13:8000/wordle/>)
+It also works on any sized wordle (site: <http://lelserslasers.pythonanywhere.com/wordle/>)
 ![Helper Tool with different sizes](https://github.com/LelsersLasers/WordleHelper/raw/main/showcase/works_with_different_sizes.PNG)
 
 ## `wordle_solver`
